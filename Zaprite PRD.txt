@@ -1,0 +1,64 @@
+Zaprite Product Requirements Document: Pubkey Bar "Zap a Round" Feature
+
+1. Product Overview
+   1.1 Product Name: Zaprite "Zap a Round" for Pubkey Bar
+   1.2 Purpose: To enable customers to purchase and gift rounds of drinks at Pubkey Bar using Bitcoin and Lightning Network payments.
+   1.3 Target Users: Pubkey Bar customers and potential gift-givers
+
+2. Feature Description
+   2.1 Core Functionality: Allow users to purchase preset amounts of drinks as an open gift certificate for Pubkey Bar.
+   2.2 Payment Method: Integrate Zaprite API to facilitate Bitcoin (Layer 1) and Lightning Network payments.
+   2.3 Notification System: Alert bar staff of incoming orders during business hours.
+   2.4 Off-hours Handling: Process orders made outside business hours on the next business day.
+   2.5 Social Sharing: Provide users with a shareable link to announce their gift on social media.
+
+3. User Interface Requirements
+   3.1 Website: Develop a single-page, visually appealing website to host the "Zap a Round" widget.
+   3.2 Widget Design: Create an intuitive, fun-looking widget for selecting and purchasing drink rounds.
+   3.3 Disclaimer: Clearly display information about off-hours order processing.
+   3.4 Branding: Include "Powered by Zaprite" on the website.
+
+4. Technical Requirements
+   4.1 API Integration: Utilize Zaprite API for payment processing.
+   4.2 Email Notifications: Set up an email system to notify bar staff of incoming orders.
+   4.3 iPad Application: Develop or adapt an existing app to display incoming orders on an iPad at the bar.
+   4.4 Visual Alert System: Implement a flashing light system at the bar for new order notifications.
+
+5. Operational Requirements
+   5.1 Order Processing: Pre-fill tax and tip for streamlined order handling.
+   5.2 POS Integration: Enable easy input of orders into the existing Toast POS system.
+   5.3 Staff Training: Provide guidance on handling incoming digital orders and pouring drinks accordingly.
+
+6. Legal and Compliance
+   6.1 Disclaimers: Include necessary legal disclaimers regarding alcohol purchase and consumption.
+   6.2 Age Verification: Implement a system to verify the legal drinking age of purchasers.
+
+7. Marketing and Promotion
+   7.1 Social Media Integration: Develop shareable content for users to post about their gifted rounds.
+   7.2 Pubkey Bar Promotion: Create marketing materials for Pubkey Bar to promote the new feature.
+
+8. Future Considerations
+   8.1 Analytics: Implement tracking to measure usage and popularity of the feature.
+   8.2 Expansion: Consider adapting the system for other bars or venues in the future.
+
+9. Success Metrics
+   9.1 Usage Rate: Track the number of rounds purchased through the system.
+   9.2 Customer Satisfaction: Gather feedback from both purchasers and recipients of gifted rounds.
+   9.3 Operational Efficiency: Monitor the impact on bar operations and staff workload.
+
+10. Timeline and Milestones
+    10.1 Design Phase: Create UI/UX for the website and widget (2 weeks)
+    10.2 Development Phase: Build the core functionality and integrations (4-6 weeks)
+    10.3 Testing Phase: Conduct thorough testing of all systems (2 weeks)
+    10.4 Soft Launch: Initial rollout with limited promotion (1 week)
+    10.5 Full Launch: Wide-scale promotion and full operation (Ongoing)
+
+11. Budget Considerations
+    11.1 Development Costs: Estimate for website, widget, and iPad app development
+    11.2 Hardware Costs: Budget for iPad (if needed) and visual alert system
+    11.3 Ongoing Costs: API usage fees, maintenance, and potential upgrades
+
+12. Risks and Mitigation Strategies
+    12.1 Technical Issues: Ensure robust error handling and customer support
+    12.2 Regulatory Compliance: Consult with legal experts on alcohol gifting regulations
+    12.3 User Adoption: Develop a strong marketing strategy to encourage usage

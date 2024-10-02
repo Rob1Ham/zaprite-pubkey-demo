@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zap a Round at Pubkey Bar</title>
+    <style>
+        /* Basic styling */
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        #zapWidget { border: 1px solid #ccc; padding: 20px; border-radius: 5px; }
+        button { cursor: pointer; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Zap a Round at Pubkey Bar</h1>
+    <div id="zapWidget">
+        <h2>Select a Round</h2>
+        <select id="roundSelect">
+            <option value="10">Small Round ($10)</option>
+            <option value="20">Medium Round ($20)</option>
+            <option value="30">Large Round ($30)</option>
+        </select>
+        <button onclick="zapRound()">Zap this Round!</button>
+    </div>
+    <p id="result"></p>
+    <p><small>Powered by Zaprite</small></p>
+
+    <script>
+        async function zapRound() {
+            const amount = document.getElementById('roundSelect').value;
+            const result = document.getElementById('result');
+
+            try {
+                const response = await fetch('/api/createOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amount, // Server will convert this to cents
+                        currency: 'USD',
+                        label: `Round of drinks at Pubkey Bar ($${amount})`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create order');
+                }
+
+                const data = await response.json();
+                result.innerHTML = `Success! Pay here: <a href="${data.checkoutUrl}" target="_blank">${data.checkoutUrl}</a>`;
+
+                notifyBarStaff(amount);
+            } catch (error) {
+                result.innerHTML = `Error: ${error.message}`;
+                console.error('Full error:', error);
+            }
+        }
+
+        function notifyBarStaff(amount) {
+            console.log(`Notifying bar staff: New round ordered for $${amount}`);
+        }
+    </script>
+</body>
+</html>

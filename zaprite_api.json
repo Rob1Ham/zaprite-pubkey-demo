@@ -1,0 +1,2314 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Zaprite API",
+      "description": "The Zaprite API lets you get and create Orders programmatically to easily integrate the Zaprite Checkout experience into your own website. You can also configure Webhooks to get notified about events on your Zaprite Organization. If you have questions or need help integrating with the Zaprite API, please [contact us](https://help.zaprite.com/).",
+      "version": "1.0"
+    },
+    "servers": [
+      {
+        "url": "https://api.zaprite.com"
+      }
+    ],
+    "paths": {
+      "/v1/order": {
+        "post": {
+          "operationId": "createOrder",
+          "summary": "Create a new order",
+          "description": "Create a Zaprite Order and send your customer to `checkoutUrl` to pay.<br/>💡 To test your integration, you can use Zaprite <a href=\"https://app.zaprite.com/org/default/connections/testPayment\">Test Payment</a> connection to complete an Order with no real payment.",
+          "tags": [
+            "Orders"
+          ],
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Amount denominated in currency smallest unit (e.g., cents for USD, satoshis for BTC). Example: `100` for $1.00 USD."
+                    },
+                    "currency": {
+                      "type": "string",
+                      "enum": [
+                        "USD",
+                        "BTC",
+                        "LBTC",
+                        "ALL",
+                        "DZD",
+                        "ARS",
+                        "AMD",
+                        "AUD",
+                        "AZN",
+                        "BHD",
+                        "BDT",
+                        "BYN",
+                        "BMD",
+                        "BOB",
+                        "BAM",
+                        "BRL",
+                        "BGN",
+                        "KHR",
+                        "CAD",
+                        "CLP",
+                        "CNY",
+                        "COP",
+                        "CRC",
+                        "HRK",
+                        "CUP",
+                        "CZK",
+                        "DKK",
+                        "DOP",
+                        "EGP",
+                        "EUR",
+                        "GEL",
+                        "GHS",
+                        "GTQ",
+                        "HNL",
+                        "HKD",
+                        "HUF",
+                        "ISK",
+                        "INR",
+                        "IDR",
+                        "IRR",
+                        "IQD",
+                        "ILS",
+                        "JMD",
+                        "JPY",
+                        "JOD",
+                        "KZT",
+                        "KES",
+                        "KWD",
+                        "KGS",
+                        "LBP",
+                        "MKD",
+                        "MYR",
+                        "MUR",
+                        "MXN",
+                        "MDL",
+                        "MNT",
+                        "MAD",
+                        "MMK",
+                        "NAD",
+                        "NPR",
+                        "TWD",
+                        "NZD",
+                        "NIO",
+                        "NGN",
+                        "NOK",
+                        "OMR",
+                        "PKR",
+                        "PAB",
+                        "PEN",
+                        "PHP",
+                        "PLN",
+                        "GBP",
+                        "QAR",
+                        "RON",
+                        "RUB",
+                        "SAR",
+                        "RSD",
+                        "SGD",
+                        "ZAR",
+                        "KRW",
+                        "SSP",
+                        "VES",
+                        "LKR",
+                        "SEK",
+                        "CHF",
+                        "THB",
+                        "TTD",
+                        "TND",
+                        "TRY",
+                        "UGX",
+                        "UAH",
+                        "AED",
+                        "UYU",
+                        "UZS",
+                        "VND"
+                      ]
+                    },
+                    "externalUniqId": {
+                      "type": "string",
+                      "description": "Optionally, you can store your own unique ID for this order. This can be useful for reconciling payments with your own systems."
+                    },
+                    "redirectUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Redirect your customer to this URL after they have paid for the order."
+                    },
+                    "redirectIfPending": {
+                      "type": "boolean",
+                      "description": "If true, the customer will be redirected to `redirectUrl` even if the order is still pending (ie. Bitcoin transaction is unconfirmed)."
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "Will be shown on the checkout page and in Bitcoin on-chain transaction labels."
+                    },
+                    "customCheckoutId": {
+                      "type": "string",
+                      "description": "If you want a custom checkout for specific orders, you can configure a new checkout at https://app.zaprite.com/org/default/checkouts/new"
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "currency"
+                  ],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "amount": 100,
+                  "currency": "USD",
+                  "externalUniqId": "abc123",
+                  "redirectUrl": "https://example.com",
+                  "label": "Label for the order"
+                }
+              }
+            }
+          },
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "orgId": {
+                        "type": "string",
+                        "description": "Id of the Zaprite organization that created this order"
+                      },
+                      "orderType": {
+                        "type": "string",
+                        "enum": [
+                          "invoice",
+                          "paymentLink",
+                          "pos",
+                          "wooCommerce",
+                          "other"
+                        ]
+                      },
+                      "totalAmount": {
+                        "type": "integer",
+                        "description": "Total amount to be paid by the customer in currency smallest unit (e.g. cents or sats)"
+                      },
+                      "currency": {
+                        "type": "string",
+                        "enum": [
+                          "USD",
+                          "BTC",
+                          "LBTC",
+                          "ALL",
+                          "DZD",
+                          "ARS",
+                          "AMD",
+                          "AUD",
+                          "AZN",
+                          "BHD",
+                          "BDT",
+                          "BYN",
+                          "BMD",
+                          "BOB",
+                          "BAM",
+                          "BRL",
+                          "BGN",
+                          "KHR",
+                          "CAD",
+                          "CLP",
+                          "CNY",
+                          "COP",
+                          "CRC",
+                          "HRK",
+                          "CUP",
+                          "CZK",
+                          "DKK",
+                          "DOP",
+                          "EGP",
+                          "EUR",
+                          "GEL",
+                          "GHS",
+                          "GTQ",
+                          "HNL",
+                          "HKD",
+                          "HUF",
+                          "ISK",
+                          "INR",
+                          "IDR",
+                          "IRR",
+                          "IQD",
+                          "ILS",
+                          "JMD",
+                          "JPY",
+                          "JOD",
+                          "KZT",
+                          "KES",
+                          "KWD",
+                          "KGS",
+                          "LBP",
+                          "MKD",
+                          "MYR",
+                          "MUR",
+                          "MXN",
+                          "MDL",
+                          "MNT",
+                          "MAD",
+                          "MMK",
+                          "NAD",
+                          "NPR",
+                          "TWD",
+                          "NZD",
+                          "NIO",
+                          "NGN",
+                          "NOK",
+                          "OMR",
+                          "PKR",
+                          "PAB",
+                          "PEN",
+                          "PHP",
+                          "PLN",
+                          "GBP",
+                          "QAR",
+                          "RON",
+                          "RUB",
+                          "SAR",
+                          "RSD",
+                          "SGD",
+                          "ZAR",
+                          "KRW",
+                          "SSP",
+                          "VES",
+                          "LKR",
+                          "SEK",
+                          "CHF",
+                          "THB",
+                          "TTD",
+                          "TND",
+                          "TRY",
+                          "UGX",
+                          "UAH",
+                          "AED",
+                          "UYU",
+                          "UZS",
+                          "VND"
+                        ]
+                      },
+                      "externalUniqId": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "PENDING",
+                          "PROCESSING",
+                          "PAID",
+                          "OVERPAID",
+                          "UNDERPAID",
+                          "COMPLETE"
+                        ],
+                        "description": "`PENDING`: The order is pending payment</br>`PROCESSING`: The order received a payment but the transaction is still pending (ie. an on-chain transaction with 0 conf or manual bank transfer awaiting manual confirmation)</br>`PAID`: The order was paid but it requires manual fulfillment to be flagged as `COMPLETE`</br>`COMPLETE`: The order was paid and is complete</br>`OVERPAID`: The order received a payment that was more than the total amount</br>`UNDERPAID`: The order received a payment that was less than the total amount"
+                      },
+                      "paidAt": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Date in ISO 8601 format (e.g. \"2021-01-01T00:00:00.000Z\"). `null` until the order is paid."
+                      },
+                      "redirectUrl": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "label": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "checkoutUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Send your customer to this URL to complete the payment"
+                      },
+                      "customCheckoutId": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "contact": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "legalName": {
+                            "type": "string"
+                          },
+                          "contactName": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "displayName": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "email": {
+                            "type": "string",
+                            "format": "email",
+                            "nullable": true
+                          },
+                          "taxId": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "legalName",
+                          "contactName",
+                          "displayName",
+                          "email",
+                          "taxId"
+                        ],
+                        "additionalProperties": false,
+                        "description": "Optional Zaprite contact associated with this order",
+                        "nullable": true
+                      },
+                      "invoice": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "number": {
+                            "type": "string",
+                            "description": "Invoice number, displayed on the invoice page and PDF"
+                          },
+                          "title": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "orgId": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "DRAFT",
+                              "SENT",
+                              "PAID",
+                              "OVERPAID",
+                              "UNDERPAID"
+                            ]
+                          },
+                          "footerNote": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "daysToPay": {
+                            "type": "integer",
+                            "nullable": true,
+                            "description": "Natural days from invoice date before the invoice is overdue. If null, invoice will be shown as \"DUE ON RECEIPT\""
+                          },
+                          "date": {
+                            "type": "string",
+                            "description": "Date of the invoice, displayed on the invoice page and PDF. Format: YYYY-MM-DD"
+                          },
+                          "purchaseOrderNumber": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "hideOrgAddress": {
+                            "type": "boolean",
+                            "description": "Organization address is hidden on the public invoice"
+                          },
+                          "hideOrgEmail": {
+                            "type": "boolean",
+                            "description": "Organization email is hidden on the public invoice"
+                          },
+                          "hideOrgName": {
+                            "type": "boolean",
+                            "description": "Organization name is hidden on the public invoice"
+                          },
+                          "sentAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Date when the invoice was sent to the customer"
+                          },
+                          "customer": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "legalName": {
+                                "type": "string"
+                              },
+                              "contactName": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "displayName": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "email": {
+                                "type": "string",
+                                "format": "email",
+                                "nullable": true
+                              },
+                              "taxId": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "legalName",
+                              "contactName",
+                              "displayName",
+                              "email",
+                              "taxId"
+                            ],
+                            "additionalProperties": false,
+                            "description": "**DEPRECATED:** Use `order.contact` instead",
+                            "nullable": true
+                          },
+                          "lineItems": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "unitPrice": {
+                                  "type": "integer",
+                                  "description": "Price of the item in currency smallest unit (e.g. cents or sats)"
+                                },
+                                "quantity": {
+                                  "type": "integer"
+                                },
+                                "taxRateBips": {
+                                  "type": "integer",
+                                  "description": "Tax rate in bips (e.g. 1234 for 12.34%)"
+                                },
+                                "taxAmount": {
+                                  "type": "integer",
+                                  "description": "In currency smallest unit (e.g. cents or sats)"
+                                },
+                                "discountRateBips": {
+                                  "type": "integer",
+                                  "description": "Discount rate in bips (e.g. 1234 for 12.34%)"
+                                },
+                                "discountAmount": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "description",
+                                "unitPrice",
+                                "quantity",
+                                "taxRateBips",
+                                "taxAmount",
+                                "discountRateBips",
+                                "discountAmount"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "number",
+                          "title",
+                          "orgId",
+                          "status",
+                          "footerNote",
+                          "daysToPay",
+                          "date",
+                          "purchaseOrderNumber",
+                          "hideOrgAddress",
+                          "hideOrgEmail",
+                          "hideOrgName",
+                          "sentAt",
+                          "customer",
+                          "lineItems"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Set only if the order is for a Zaprite invoice (`orderType=\"invoice\"`), `null` otherwise"
+                      },
+                      "paymentLink": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Set only if the order was created from a Payment Link (`orderType=\"paymentLink\"`), `null` otherwise"
+                      },
+                      "transactions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "date": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "Date in ISO 8601 format (e.g. \"2021-01-01T00:00:00.000Z\")"
+                            },
+                            "amount": {
+                              "type": "integer",
+                              "description": "Transaction amount in currency smallest unit (e.g. cents or sats)"
+                            },
+                            "currency": {
+                              "type": "string",
+                              "enum": [
+                                "USD",
+                                "BTC",
+                                "LBTC",
+                                "ALL",
+                                "DZD",
+                                "ARS",
+                                "AMD",
+                                "AUD",
+                                "AZN",
+                                "BHD",
+                                "BDT",
+                                "BYN",
+                                "BMD",
+                                "BOB",
+                                "BAM",
+                                "BRL",
+                                "BGN",
+                                "KHR",
+                                "CAD",
+                                "CLP",
+                                "CNY",
+                                "COP",
+                                "CRC",
+                                "HRK",
+                                "CUP",
+                                "CZK",
+                                "DKK",
+                                "DOP",
+                                "EGP",
+                                "EUR",
+                                "GEL",
+                                "GHS",
+                                "GTQ",
+                                "HNL",
+                                "HKD",
+                                "HUF",
+                                "ISK",
+                                "INR",
+                                "IDR",
+                                "IRR",
+                                "IQD",
+                                "ILS",
+                                "JMD",
+                                "JPY",
+                                "JOD",
+                                "KZT",
+                                "KES",
+                                "KWD",
+                                "KGS",
+                                "LBP",
+                                "MKD",
+                                "MYR",
+                                "MUR",
+                                "MXN",
+                                "MDL",
+                                "MNT",
+                                "MAD",
+                                "MMK",
+                                "NAD",
+                                "NPR",
+                                "TWD",
+                                "NZD",
+                                "NIO",
+                                "NGN",
+                                "NOK",
+                                "OMR",
+                                "PKR",
+                                "PAB",
+                                "PEN",
+                                "PHP",
+                                "PLN",
+                                "GBP",
+                                "QAR",
+                                "RON",
+                                "RUB",
+                                "SAR",
+                                "RSD",
+                                "SGD",
+                                "ZAR",
+                                "KRW",
+                                "SSP",
+                                "VES",
+                                "LKR",
+                                "SEK",
+                                "CHF",
+                                "THB",
+                                "TTD",
+                                "TND",
+                                "TRY",
+                                "UGX",
+                                "UAH",
+                                "AED",
+                                "UYU",
+                                "UZS",
+                                "VND"
+                              ]
+                            },
+                            "amountInOrderCurrency": {
+                              "type": "integer",
+                              "nullable": true,
+                              "description": "Transaction amount denominated in the currency of the Order and in smallest unit (e.g. cents or sats)"
+                            },
+                            "discountsInOrderCurrency": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "amountOff": {
+                                    "type": "integer",
+                                    "description": "Amount of the discount denominated in `orderCurrency` and in smallest unit (e.g cents or sats). Negative value means a premium was applied."
+                                  },
+                                  "rateBipsOff": {
+                                    "type": "integer",
+                                    "description": "Rate of the discount in bips (e.g. 1234 for 12.34%). Negative value means a premium was applied."
+                                  },
+                                  "paymentType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "FIAT",
+                                      "BITCOIN",
+                                      "LIGHTNING"
+                                    ],
+                                    "description": "Type of payments this discount applies to"
+                                  }
+                                },
+                                "required": [
+                                  "amountOff",
+                                  "rateBipsOff",
+                                  "paymentType"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "List premiums and discounts applied to this transaction. Note: The amount retained as payment for the Order is `amountInOrderCurrency + sum(discountsInChargeCurrency.amount)`"
+                            },
+                            "orderCurrency": {
+                              "type": "string",
+                              "enum": [
+                                "USD",
+                                "BTC",
+                                "LBTC",
+                                "ALL",
+                                "DZD",
+                                "ARS",
+                                "AMD",
+                                "AUD",
+                                "AZN",
+                                "BHD",
+                                "BDT",
+                                "BYN",
+                                "BMD",
+                                "BOB",
+                                "BAM",
+                                "BRL",
+                                "BGN",
+                                "KHR",
+                                "CAD",
+                                "CLP",
+                                "CNY",
+                                "COP",
+                                "CRC",
+                                "HRK",
+                                "CUP",
+                                "CZK",
+                                "DKK",
+                                "DOP",
+                                "EGP",
+                                "EUR",
+                                "GEL",
+                                "GHS",
+                                "GTQ",
+                                "HNL",
+                                "HKD",
+                                "HUF",
+                                "ISK",
+                                "INR",
+                                "IDR",
+                                "IRR",
+                                "IQD",
+                                "ILS",
+                                "JMD",
+                                "JPY",
+                                "JOD",
+                                "KZT",
+                                "KES",
+                                "KWD",
+                                "KGS",
+                                "LBP",
+                                "MKD",
+                                "MYR",
+                                "MUR",
+                                "MXN",
+                                "MDL",
+                                "MNT",
+                                "MAD",
+                                "MMK",
+                                "NAD",
+                                "NPR",
+                                "TWD",
+                                "NZD",
+                                "NIO",
+                                "NGN",
+                                "NOK",
+                                "OMR",
+                                "PKR",
+                                "PAB",
+                                "PEN",
+                                "PHP",
+                                "PLN",
+                                "GBP",
+                                "QAR",
+                                "RON",
+                                "RUB",
+                                "SAR",
+                                "RSD",
+                                "SGD",
+                                "ZAR",
+                                "KRW",
+                                "SSP",
+                                "VES",
+                                "LKR",
+                                "SEK",
+                                "CHF",
+                                "THB",
+                                "TTD",
+                                "TND",
+                                "TRY",
+                                "UGX",
+                                "UAH",
+                                "AED",
+                                "UYU",
+                                "UZS",
+                                "VND"
+                              ],
+                              "nullable": true,
+                              "description": "Currency of the Order this transaction is paying for. For example, when paying an USD invoice in BTC, transaction `currency` would be USD and `orderCurrency` USD."
+                            },
+                            "accountingCurrency": {
+                              "type": "string",
+                              "enum": [
+                                "USD",
+                                "BTC",
+                                "LBTC",
+                                "ALL",
+                                "DZD",
+                                "ARS",
+                                "AMD",
+                                "AUD",
+                                "AZN",
+                                "BHD",
+                                "BDT",
+                                "BYN",
+                                "BMD",
+                                "BOB",
+                                "BAM",
+                                "BRL",
+                                "BGN",
+                                "KHR",
+                                "CAD",
+                                "CLP",
+                                "CNY",
+                                "COP",
+                                "CRC",
+                                "HRK",
+                                "CUP",
+                                "CZK",
+                                "DKK",
+                                "DOP",
+                                "EGP",
+                                "EUR",
+                                "GEL",
+                                "GHS",
+                                "GTQ",
+                                "HNL",
+                                "HKD",
+                                "HUF",
+                                "ISK",
+                                "INR",
+                                "IDR",
+                                "IRR",
+                                "IQD",
+                                "ILS",
+                                "JMD",
+                                "JPY",
+                                "JOD",
+                                "KZT",
+                                "KES",
+                                "KWD",
+                                "KGS",
+                                "LBP",
+                                "MKD",
+                                "MYR",
+                                "MUR",
+                                "MXN",
+                                "MDL",
+                                "MNT",
+                                "MAD",
+                                "MMK",
+                                "NAD",
+                                "NPR",
+                                "TWD",
+                                "NZD",
+                                "NIO",
+                                "NGN",
+                                "NOK",
+                                "OMR",
+                                "PKR",
+                                "PAB",
+                                "PEN",
+                                "PHP",
+                                "PLN",
+                                "GBP",
+                                "QAR",
+                                "RON",
+                                "RUB",
+                                "SAR",
+                                "RSD",
+                                "SGD",
+                                "ZAR",
+                                "KRW",
+                                "SSP",
+                                "VES",
+                                "LKR",
+                                "SEK",
+                                "CHF",
+                                "THB",
+                                "TTD",
+                                "TND",
+                                "TRY",
+                                "UGX",
+                                "UAH",
+                                "AED",
+                                "UYU",
+                                "UZS",
+                                "VND"
+                              ],
+                              "nullable": true,
+                              "description": "The is the currency configured for your Organization"
+                            },
+                            "amountInAccountingCurrency": {
+                              "type": "integer",
+                              "nullable": true,
+                              "description": "Transaction amount denominated in accounting currency and in smallest unit (e.g. cents or sats)"
+                            },
+                            "method": {
+                              "type": "string",
+                              "enum": [
+                                "BITCOIN",
+                                "LIQUID",
+                                "LIGHTNING",
+                                "BANK",
+                                "CARD",
+                                "CASH",
+                                "CHECK",
+                                "GIFTCARD",
+                                "COUPON",
+                                "APPLEPAY",
+                                "GOOGLEPAY",
+                                "CASHAPP_PAY",
+                                "INTERAC",
+                                "ACH",
+                                "SEPA",
+                                "UNKNOWN",
+                                "WIRE_TRANSFER",
+                                "VENMO",
+                                "PAYPAL",
+                                "NO_CHARGE"
+                              ]
+                            },
+                            "externalRef": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "External reference for the transaction. (e.g. Bitcoin txId, Stripe transaction ID...)"
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "PENDING",
+                                "CONFIRMED",
+                                "CANCELED"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "date",
+                            "amount",
+                            "currency",
+                            "amountInOrderCurrency",
+                            "discountsInOrderCurrency",
+                            "orderCurrency",
+                            "accountingCurrency",
+                            "amountInAccountingCurrency",
+                            "method",
+                            "externalRef",
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "All transactions this Order received"
+                      },
+                      "customerData": {
+                        "type": "object",
+                        "properties": {
+                          "email": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "name": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "phone": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "address": {
+                            "type": "object",
+                            "properties": {
+                              "line1": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "line2": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "zipCode": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "city": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "state": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "countryCode": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "line1",
+                              "line2",
+                              "zipCode",
+                              "city",
+                              "state",
+                              "countryCode"
+                            ],
+                            "additionalProperties": false,
+                            "nullable": true
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "email",
+                          "name",
+                          "phone",
+                          "address",
+                          "note"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Customer data collected on payment links if you enabled customer fields."
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "properties": {
+                          "utm_source": {
+                            "type": "string"
+                          },
+                          "utm_medium": {
+                            "type": "string"
+                          },
+                          "utm_campaign": {
+                            "type": "string"
+                          },
+                          "utm_term": {
+                            "type": "string"
+                          },
+                          "utm_content": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "description": "Additional optional information about the order"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "orgId",
+                      "orderType",
+                      "totalAmount",
+                      "currency",
+                      "externalUniqId",
+                      "status",
+                      "paidAt",
+                      "redirectUrl",
+                      "label",
+                      "checkoutUrl",
+                      "customCheckoutId",
+                      "contact",
+                      "invoice",
+                      "paymentLink",
+                      "transactions",
+                      "customerData",
+                      "metadata"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "example": {
+                    "id": "od_abc123",
+                    "orgId": "abc123",
+                    "orderType": "other",
+                    "totalAmount": 100,
+                    "currency": "USD",
+                    "externalUniqId": "abc123",
+                    "status": "PROCESSING",
+                    "paidAt": "2024-02-25T11:04:09.656Z",
+                    "redirectUrl": "https://your-url.com",
+                    "label": "Order label",
+                    "checkoutUrl": "https://pay.zaprite.com/order/od_abc123",
+                    "customCheckoutId": null,
+                    "invoice": null,
+                    "contact": null,
+                    "transactions": [
+                      {
+                        "amount": 1400,
+                        "currency": "BTC",
+                        "amountInOrderCurrency": 100,
+                        "discountsInOrderCurrency": [],
+                        "orderCurrency": "USD",
+                        "amountInAccountingCurrency": 100,
+                        "accountingCurrency": "USD",
+                        "method": "BITCOIN",
+                        "status": "PENDING",
+                        "date": "2024-02-25T11:04:09.656Z",
+                        "externalRef": "b340b455d25ae2379e3a22328c96421a8f5a4483848e01f14eee0abae89daabc"
+                      }
+                    ],
+                    "paymentLink": null,
+                    "customerData": {
+                      "email": "example@email.com",
+                      "name": "John Doe",
+                      "phone": "1234567890",
+                      "address": null,
+                      "note": "Example customer note"
+                    },
+                    "metadata": {}
+                  }
+                }
+              }
+            },
+            "default": {
+              "$ref": "#/components/responses/error"
+            }
+          }
+        }
+      },
+      "/v1/order/{id}": {
+        "get": {
+          "operationId": "getOrderById",
+          "summary": "Get an order by ID",
+          "description": "Get an order by either it's Zaprite ID or your own ID (`externalUniqId`)",
+          "tags": [
+            "Orders"
+          ],
+          "security": [
+            {
+              "Authorization": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Zaprite ID or externalUniqId"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "orgId": {
+                        "type": "string",
+                        "description": "Id of the Zaprite organization that created this order"
+                      },
+                      "orderType": {
+                        "type": "string",
+                        "enum": [
+                          "invoice",
+                          "paymentLink",
+                          "pos",
+                          "wooCommerce",
+                          "other"
+                        ]
+                      },
+                      "totalAmount": {
+                        "type": "integer",
+                        "description": "Total amount to be paid by the customer in currency smallest unit (e.g. cents or sats)"
+                      },
+                      "currency": {
+                        "type": "string",
+                        "enum": [
+                          "USD",
+                          "BTC",
+                          "LBTC",
+                          "ALL",
+                          "DZD",
+                          "ARS",
+                          "AMD",
+                          "AUD",
+                          "AZN",
+                          "BHD",
+                          "BDT",
+                          "BYN",
+                          "BMD",
+                          "BOB",
+                          "BAM",
+                          "BRL",
+                          "BGN",
+                          "KHR",
+                          "CAD",
+                          "CLP",
+                          "CNY",
+                          "COP",
+                          "CRC",
+                          "HRK",
+                          "CUP",
+                          "CZK",
+                          "DKK",
+                          "DOP",
+                          "EGP",
+                          "EUR",
+                          "GEL",
+                          "GHS",
+                          "GTQ",
+                          "HNL",
+                          "HKD",
+                          "HUF",
+                          "ISK",
+                          "INR",
+                          "IDR",
+                          "IRR",
+                          "IQD",
+                          "ILS",
+                          "JMD",
+                          "JPY",
+                          "JOD",
+                          "KZT",
+                          "KES",
+                          "KWD",
+                          "KGS",
+                          "LBP",
+                          "MKD",
+                          "MYR",
+                          "MUR",
+                          "MXN",
+                          "MDL",
+                          "MNT",
+                          "MAD",
+                          "MMK",
+                          "NAD",
+                          "NPR",
+                          "TWD",
+                          "NZD",
+                          "NIO",
+                          "NGN",
+                          "NOK",
+                          "OMR",
+                          "PKR",
+                          "PAB",
+                          "PEN",
+                          "PHP",
+                          "PLN",
+                          "GBP",
+                          "QAR",
+                          "RON",
+                          "RUB",
+                          "SAR",
+                          "RSD",
+                          "SGD",
+                          "ZAR",
+                          "KRW",
+                          "SSP",
+                          "VES",
+                          "LKR",
+                          "SEK",
+                          "CHF",
+                          "THB",
+                          "TTD",
+                          "TND",
+                          "TRY",
+                          "UGX",
+                          "UAH",
+                          "AED",
+                          "UYU",
+                          "UZS",
+                          "VND"
+                        ]
+                      },
+                      "externalUniqId": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "PENDING",
+                          "PROCESSING",
+                          "PAID",
+                          "OVERPAID",
+                          "UNDERPAID",
+                          "COMPLETE"
+                        ],
+                        "description": "`PENDING`: The order is pending payment</br>`PROCESSING`: The order received a payment but the transaction is still pending (ie. an on-chain transaction with 0 conf or manual bank transfer awaiting manual confirmation)</br>`PAID`: The order was paid but it requires manual fulfillment to be flagged as `COMPLETE`</br>`COMPLETE`: The order was paid and is complete</br>`OVERPAID`: The order received a payment that was more than the total amount</br>`UNDERPAID`: The order received a payment that was less than the total amount"
+                      },
+                      "paidAt": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Date in ISO 8601 format (e.g. \"2021-01-01T00:00:00.000Z\"). `null` until the order is paid."
+                      },
+                      "redirectUrl": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "label": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "checkoutUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Send your customer to this URL to complete the payment"
+                      },
+                      "customCheckoutId": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "contact": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "legalName": {
+                            "type": "string"
+                          },
+                          "contactName": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "displayName": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "email": {
+                            "type": "string",
+                            "format": "email",
+                            "nullable": true
+                          },
+                          "taxId": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "legalName",
+                          "contactName",
+                          "displayName",
+                          "email",
+                          "taxId"
+                        ],
+                        "additionalProperties": false,
+                        "description": "Optional Zaprite contact associated with this order",
+                        "nullable": true
+                      },
+                      "invoice": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "number": {
+                            "type": "string",
+                            "description": "Invoice number, displayed on the invoice page and PDF"
+                          },
+                          "title": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "orgId": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "DRAFT",
+                              "SENT",
+                              "PAID",
+                              "OVERPAID",
+                              "UNDERPAID"
+                            ]
+                          },
+                          "footerNote": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "daysToPay": {
+                            "type": "integer",
+                            "nullable": true,
+                            "description": "Natural days from invoice date before the invoice is overdue. If null, invoice will be shown as \"DUE ON RECEIPT\""
+                          },
+                          "date": {
+                            "type": "string",
+                            "description": "Date of the invoice, displayed on the invoice page and PDF. Format: YYYY-MM-DD"
+                          },
+                          "purchaseOrderNumber": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "hideOrgAddress": {
+                            "type": "boolean",
+                            "description": "Organization address is hidden on the public invoice"
+                          },
+                          "hideOrgEmail": {
+                            "type": "boolean",
+                            "description": "Organization email is hidden on the public invoice"
+                          },
+                          "hideOrgName": {
+                            "type": "boolean",
+                            "description": "Organization name is hidden on the public invoice"
+                          },
+                          "sentAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Date when the invoice was sent to the customer"
+                          },
+                          "customer": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "legalName": {
+                                "type": "string"
+                              },
+                              "contactName": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "displayName": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "email": {
+                                "type": "string",
+                                "format": "email",
+                                "nullable": true
+                              },
+                              "taxId": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "legalName",
+                              "contactName",
+                              "displayName",
+                              "email",
+                              "taxId"
+                            ],
+                            "additionalProperties": false,
+                            "description": "**DEPRECATED:** Use `order.contact` instead",
+                            "nullable": true
+                          },
+                          "lineItems": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "unitPrice": {
+                                  "type": "integer",
+                                  "description": "Price of the item in currency smallest unit (e.g. cents or sats)"
+                                },
+                                "quantity": {
+                                  "type": "integer"
+                                },
+                                "taxRateBips": {
+                                  "type": "integer",
+                                  "description": "Tax rate in bips (e.g. 1234 for 12.34%)"
+                                },
+                                "taxAmount": {
+                                  "type": "integer",
+                                  "description": "In currency smallest unit (e.g. cents or sats)"
+                                },
+                                "discountRateBips": {
+                                  "type": "integer",
+                                  "description": "Discount rate in bips (e.g. 1234 for 12.34%)"
+                                },
+                                "discountAmount": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "description",
+                                "unitPrice",
+                                "quantity",
+                                "taxRateBips",
+                                "taxAmount",
+                                "discountRateBips",
+                                "discountAmount"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "number",
+                          "title",
+                          "orgId",
+                          "status",
+                          "footerNote",
+                          "daysToPay",
+                          "date",
+                          "purchaseOrderNumber",
+                          "hideOrgAddress",
+                          "hideOrgEmail",
+                          "hideOrgName",
+                          "sentAt",
+                          "customer",
+                          "lineItems"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Set only if the order is for a Zaprite invoice (`orderType=\"invoice\"`), `null` otherwise"
+                      },
+                      "paymentLink": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Set only if the order was created from a Payment Link (`orderType=\"paymentLink\"`), `null` otherwise"
+                      },
+                      "transactions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "date": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "Date in ISO 8601 format (e.g. \"2021-01-01T00:00:00.000Z\")"
+                            },
+                            "amount": {
+                              "type": "integer",
+                              "description": "Transaction amount in currency smallest unit (e.g. cents or sats)"
+                            },
+                            "currency": {
+                              "type": "string",
+                              "enum": [
+                                "USD",
+                                "BTC",
+                                "LBTC",
+                                "ALL",
+                                "DZD",
+                                "ARS",
+                                "AMD",
+                                "AUD",
+                                "AZN",
+                                "BHD",
+                                "BDT",
+                                "BYN",
+                                "BMD",
+                                "BOB",
+                                "BAM",
+                                "BRL",
+                                "BGN",
+                                "KHR",
+                                "CAD",
+                                "CLP",
+                                "CNY",
+                                "COP",
+                                "CRC",
+                                "HRK",
+                                "CUP",
+                                "CZK",
+                                "DKK",
+                                "DOP",
+                                "EGP",
+                                "EUR",
+                                "GEL",
+                                "GHS",
+                                "GTQ",
+                                "HNL",
+                                "HKD",
+                                "HUF",
+                                "ISK",
+                                "INR",
+                                "IDR",
+                                "IRR",
+                                "IQD",
+                                "ILS",
+                                "JMD",
+                                "JPY",
+                                "JOD",
+                                "KZT",
+                                "KES",
+                                "KWD",
+                                "KGS",
+                                "LBP",
+                                "MKD",
+                                "MYR",
+                                "MUR",
+                                "MXN",
+                                "MDL",
+                                "MNT",
+                                "MAD",
+                                "MMK",
+                                "NAD",
+                                "NPR",
+                                "TWD",
+                                "NZD",
+                                "NIO",
+                                "NGN",
+                                "NOK",
+                                "OMR",
+                                "PKR",
+                                "PAB",
+                                "PEN",
+                                "PHP",
+                                "PLN",
+                                "GBP",
+                                "QAR",
+                                "RON",
+                                "RUB",
+                                "SAR",
+                                "RSD",
+                                "SGD",
+                                "ZAR",
+                                "KRW",
+                                "SSP",
+                                "VES",
+                                "LKR",
+                                "SEK",
+                                "CHF",
+                                "THB",
+                                "TTD",
+                                "TND",
+                                "TRY",
+                                "UGX",
+                                "UAH",
+                                "AED",
+                                "UYU",
+                                "UZS",
+                                "VND"
+                              ]
+                            },
+                            "amountInOrderCurrency": {
+                              "type": "integer",
+                              "nullable": true,
+                              "description": "Transaction amount denominated in the currency of the Order and in smallest unit (e.g. cents or sats)"
+                            },
+                            "discountsInOrderCurrency": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "amountOff": {
+                                    "type": "integer",
+                                    "description": "Amount of the discount denominated in `orderCurrency` and in smallest unit (e.g cents or sats). Negative value means a premium was applied."
+                                  },
+                                  "rateBipsOff": {
+                                    "type": "integer",
+                                    "description": "Rate of the discount in bips (e.g. 1234 for 12.34%). Negative value means a premium was applied."
+                                  },
+                                  "paymentType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "FIAT",
+                                      "BITCOIN",
+                                      "LIGHTNING"
+                                    ],
+                                    "description": "Type of payments this discount applies to"
+                                  }
+                                },
+                                "required": [
+                                  "amountOff",
+                                  "rateBipsOff",
+                                  "paymentType"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "List premiums and discounts applied to this transaction. Note: The amount retained as payment for the Order is `amountInOrderCurrency + sum(discountsInChargeCurrency.amount)`"
+                            },
+                            "orderCurrency": {
+                              "type": "string",
+                              "enum": [
+                                "USD",
+                                "BTC",
+                                "LBTC",
+                                "ALL",
+                                "DZD",
+                                "ARS",
+                                "AMD",
+                                "AUD",
+                                "AZN",
+                                "BHD",
+                                "BDT",
+                                "BYN",
+                                "BMD",
+                                "BOB",
+                                "BAM",
+                                "BRL",
+                                "BGN",
+                                "KHR",
+                                "CAD",
+                                "CLP",
+                                "CNY",
+                                "COP",
+                                "CRC",
+                                "HRK",
+                                "CUP",
+                                "CZK",
+                                "DKK",
+                                "DOP",
+                                "EGP",
+                                "EUR",
+                                "GEL",
+                                "GHS",
+                                "GTQ",
+                                "HNL",
+                                "HKD",
+                                "HUF",
+                                "ISK",
+                                "INR",
+                                "IDR",
+                                "IRR",
+                                "IQD",
+                                "ILS",
+                                "JMD",
+                                "JPY",
+                                "JOD",
+                                "KZT",
+                                "KES",
+                                "KWD",
+                                "KGS",
+                                "LBP",
+                                "MKD",
+                                "MYR",
+                                "MUR",
+                                "MXN",
+                                "MDL",
+                                "MNT",
+                                "MAD",
+                                "MMK",
+                                "NAD",
+                                "NPR",
+                                "TWD",
+                                "NZD",
+                                "NIO",
+                                "NGN",
+                                "NOK",
+                                "OMR",
+                                "PKR",
+                                "PAB",
+                                "PEN",
+                                "PHP",
+                                "PLN",
+                                "GBP",
+                                "QAR",
+                                "RON",
+                                "RUB",
+                                "SAR",
+                                "RSD",
+                                "SGD",
+                                "ZAR",
+                                "KRW",
+                                "SSP",
+                                "VES",
+                                "LKR",
+                                "SEK",
+                                "CHF",
+                                "THB",
+                                "TTD",
+                                "TND",
+                                "TRY",
+                                "UGX",
+                                "UAH",
+                                "AED",
+                                "UYU",
+                                "UZS",
+                                "VND"
+                              ],
+                              "nullable": true,
+                              "description": "Currency of the Order this transaction is paying for. For example, when paying an USD invoice in BTC, transaction `currency` would be USD and `orderCurrency` USD."
+                            },
+                            "accountingCurrency": {
+                              "type": "string",
+                              "enum": [
+                                "USD",
+                                "BTC",
+                                "LBTC",
+                                "ALL",
+                                "DZD",
+                                "ARS",
+                                "AMD",
+                                "AUD",
+                                "AZN",
+                                "BHD",
+                                "BDT",
+                                "BYN",
+                                "BMD",
+                                "BOB",
+                                "BAM",
+                                "BRL",
+                                "BGN",
+                                "KHR",
+                                "CAD",
+                                "CLP",
+                                "CNY",
+                                "COP",
+                                "CRC",
+                                "HRK",
+                                "CUP",
+                                "CZK",
+                                "DKK",
+                                "DOP",
+                                "EGP",
+                                "EUR",
+                                "GEL",
+                                "GHS",
+                                "GTQ",
+                                "HNL",
+                                "HKD",
+                                "HUF",
+                                "ISK",
+                                "INR",
+                                "IDR",
+                                "IRR",
+                                "IQD",
+                                "ILS",
+                                "JMD",
+                                "JPY",
+                                "JOD",
+                                "KZT",
+                                "KES",
+                                "KWD",
+                                "KGS",
+                                "LBP",
+                                "MKD",
+                                "MYR",
+                                "MUR",
+                                "MXN",
+                                "MDL",
+                                "MNT",
+                                "MAD",
+                                "MMK",
+                                "NAD",
+                                "NPR",
+                                "TWD",
+                                "NZD",
+                                "NIO",
+                                "NGN",
+                                "NOK",
+                                "OMR",
+                                "PKR",
+                                "PAB",
+                                "PEN",
+                                "PHP",
+                                "PLN",
+                                "GBP",
+                                "QAR",
+                                "RON",
+                                "RUB",
+                                "SAR",
+                                "RSD",
+                                "SGD",
+                                "ZAR",
+                                "KRW",
+                                "SSP",
+                                "VES",
+                                "LKR",
+                                "SEK",
+                                "CHF",
+                                "THB",
+                                "TTD",
+                                "TND",
+                                "TRY",
+                                "UGX",
+                                "UAH",
+                                "AED",
+                                "UYU",
+                                "UZS",
+                                "VND"
+                              ],
+                              "nullable": true,
+                              "description": "The is the currency configured for your Organization"
+                            },
+                            "amountInAccountingCurrency": {
+                              "type": "integer",
+                              "nullable": true,
+                              "description": "Transaction amount denominated in accounting currency and in smallest unit (e.g. cents or sats)"
+                            },
+                            "method": {
+                              "type": "string",
+                              "enum": [
+                                "BITCOIN",
+                                "LIQUID",
+                                "LIGHTNING",
+                                "BANK",
+                                "CARD",
+                                "CASH",
+                                "CHECK",
+                                "GIFTCARD",
+                                "COUPON",
+                                "APPLEPAY",
+                                "GOOGLEPAY",
+                                "CASHAPP_PAY",
+                                "INTERAC",
+                                "ACH",
+                                "SEPA",
+                                "UNKNOWN",
+                                "WIRE_TRANSFER",
+                                "VENMO",
+                                "PAYPAL",
+                                "NO_CHARGE"
+                              ]
+                            },
+                            "externalRef": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "External reference for the transaction. (e.g. Bitcoin txId, Stripe transaction ID...)"
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "PENDING",
+                                "CONFIRMED",
+                                "CANCELED"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "date",
+                            "amount",
+                            "currency",
+                            "amountInOrderCurrency",
+                            "discountsInOrderCurrency",
+                            "orderCurrency",
+                            "accountingCurrency",
+                            "amountInAccountingCurrency",
+                            "method",
+                            "externalRef",
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "All transactions this Order received"
+                      },
+                      "customerData": {
+                        "type": "object",
+                        "properties": {
+                          "email": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "name": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "phone": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "address": {
+                            "type": "object",
+                            "properties": {
+                              "line1": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "line2": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "zipCode": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "city": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "state": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "countryCode": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "line1",
+                              "line2",
+                              "zipCode",
+                              "city",
+                              "state",
+                              "countryCode"
+                            ],
+                            "additionalProperties": false,
+                            "nullable": true
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "email",
+                          "name",
+                          "phone",
+                          "address",
+                          "note"
+                        ],
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Customer data collected on payment links if you enabled customer fields."
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "properties": {
+                          "utm_source": {
+                            "type": "string"
+                          },
+                          "utm_medium": {
+                            "type": "string"
+                          },
+                          "utm_campaign": {
+                            "type": "string"
+                          },
+                          "utm_term": {
+                            "type": "string"
+                          },
+                          "utm_content": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "description": "Additional optional information about the order"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "orgId",
+                      "orderType",
+                      "totalAmount",
+                      "currency",
+                      "externalUniqId",
+                      "status",
+                      "paidAt",
+                      "redirectUrl",
+                      "label",
+                      "checkoutUrl",
+                      "customCheckoutId",
+                      "contact",
+                      "invoice",
+                      "paymentLink",
+                      "transactions",
+                      "customerData",
+                      "metadata"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "example": {
+                    "id": "od_abc123",
+                    "orgId": "abc123",
+                    "orderType": "other",
+                    "totalAmount": 100,
+                    "currency": "USD",
+                    "externalUniqId": "abc123",
+                    "status": "PROCESSING",
+                    "paidAt": "2024-02-25T11:04:09.656Z",
+                    "redirectUrl": "https://your-url.com",
+                    "label": "Order label",
+                    "checkoutUrl": "https://pay.zaprite.com/order/od_abc123",
+                    "customCheckoutId": null,
+                    "invoice": null,
+                    "contact": null,
+                    "transactions": [
+                      {
+                        "amount": 1400,
+                        "currency": "BTC",
+                        "amountInOrderCurrency": 100,
+                        "discountsInOrderCurrency": [],
+                        "orderCurrency": "USD",
+                        "amountInAccountingCurrency": 100,
+                        "accountingCurrency": "USD",
+                        "method": "BITCOIN",
+                        "status": "PENDING",
+                        "date": "2024-02-25T11:04:09.656Z",
+                        "externalRef": "b340b455d25ae2379e3a22328c96421a8f5a4483848e01f14eee0abae89daabc"
+                      }
+                    ],
+                    "paymentLink": null,
+                    "customerData": {
+                      "email": "example@email.com",
+                      "name": "John Doe",
+                      "phone": "1234567890",
+                      "address": null,
+                      "note": "Example customer note"
+                    },
+                    "metadata": {}
+                  }
+                }
+              }
+            },
+            "default": {
+              "$ref": "#/components/responses/error"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "Authorization": {
+          "type": "http",
+          "scheme": "bearer"
+        }
+      },
+      "responses": {
+        "error": {
+          "description": "Error response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "issues": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "message",
+                  "code"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Orders"
+      },
+      {
+        "name": "Webhooks",
+        "description": "Zaprite can send requests to your own server to notify you about events on your Zaprite organization. To receive those requests, add a webhook on your [Organization settings](https://app.zaprite.com/org/default/settings/api)."
+      }
+    ],
+    "webhooks": {
+      "order.change": {
+        "post": {
+          "tags": [
+            "Webhooks"
+          ],
+          "summary": "order.change",
+          "description": "Sent to your own server when an Order status changes. You can use this hook to detect paid orders.",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "eventType": {
+                      "type": "string",
+                      "enum": [
+                        "order.change"
+                      ]
+                    },
+                    "orderId": {
+                      "type": "string",
+                      "description": "You can get order details by fetching the Order"
+                    },
+                    "orgId": {
+                      "type": "string",
+                      "description": "ID of the Zaprite Organization"
+                    }
+                  },
+                  "required": [
+                    "eventType",
+                    "orderId",
+                    "orgId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Return a **200** status to indicate that the data was received successfully. If your server returns an error HTTP code, we will retry sending multiple times then abaddon the message if all attempts failed."
+            }
+          }
+        }
+      },
+      "invoice.sent": {
+        "post": {
+          "tags": [
+            "Webhooks"
+          ],
+          "summary": "invoice.sent",
+          "description": "Sent to your own server when an invoice is sent.",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "eventType": {
+                      "type": "string",
+                      "enum": [
+                        "invoice.sent"
+                      ]
+                    },
+                    "orderId": {
+                      "type": "string",
+                      "description": "You can get invoice details by fetching the related Order"
+                    },
+                    "orgId": {
+                      "type": "string",
+                      "description": "ID of the Zaprite Organization"
+                    }
+                  },
+                  "required": [
+                    "eventType",
+                    "orderId",
+                    "orgId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Return a **200** status to indicate that the data was received successfully. If your server returns an error HTTP code, we will retry sending multiple times then abaddon the message if all attempts failed."
+            }
+          }
+        }
+      }
+    }
+  }
